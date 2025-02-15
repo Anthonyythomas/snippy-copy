@@ -1,0 +1,11 @@
+# Node.js
+node_modules/
+dist/
+.vite/
+.DS_Store
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
