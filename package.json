@@ -4,8 +4,10 @@
   "main": "dist/snippy-copy.js",
   "module": "dist/snippy-copy.esm.js",
   "exports": {
-    "import": "./dist/snippy-copy.esm.js",
-    "require": "./dist/snippy-copy.js"
+    ".": "./dist/snippy-copy.js",
+    "./import": "./dist/snippy-copy.esm.js",
+    "./require": "./dist/snippy-copy.js",
+    "./dist/snippy-copy.css": "./dist/snippy-copy.css"
   },
   "scripts": {
     "dev": "rollup -c --watch",
