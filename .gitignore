@@ -1,11 +1,29 @@
 # Node.js
 node_modules/
-dist/
-.vite/
-.DS_Store
 
-# Editor / IDE
+# Build files
+dist/
+build/
+
+# Build cache
+/.parcel-cache/
+/.cache/
+/.rollup.cache/
+
+# IDE and editor files (e.g., if you use VSCode)
 .vscode/
 .idea/
-*.swp
-*.swo
+
+# Tests
+tests/
+
+# Dependency caches (in case you use tools like npm, yarn, or others)
+.npm/
+.yarn/
+
+# System temporary files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

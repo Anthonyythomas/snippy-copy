@@ -1,3 +1,31 @@
+.light {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.light .copy-btn {
+    background-color: #27ae60;
+}
+
+.light pre {
+    background-color: #ffffff;
+    color: #333;
+}
+
+.dark {
+    background-color: #181818;
+    color: #ffffff;
+}
+
+.dark .copy-btn {
+    background-color: #444;
+}
+
+.dark pre {
+    background-color: #222222;
+    color: #ffffff;
+}
+
 .copy-btn {
     position: absolute;
     top: 8px;
@@ -26,7 +54,8 @@
 
 pre {
     position: relative;
-    background: #282c34;
+    background-color: #222222;
+    color: #ffffff;
     padding: 10px;
     border-radius: 5px;
     overflow-x: auto;
@@ -35,15 +64,53 @@ pre {
 
 code {
     font-family: monospace;
-    color: white;
+    color: #ffffff;
 }
 
-code .string { color: #9cca64; }
-code .keyword { color: #9c7bd6; }
-code .log { color: #fdc46c; }
-code .function { color: #79a1f5; }
-code .number { color: #fdc46c; }
-code .parenthesis { color: #ba99f5; }
-code .function-name { color: silver; }
-code .comment { color: #b0b0b0; }
-code .variable { color: yellow; }
+.keyword {
+    color: #9c7bd6;
+}
+
+.string {
+    color: #9cca64;
+}
+
+.comment {
+    color: #5c6690;
+}
+
+.function {
+    color: #9c7bd6;
+}
+
+.functionName {
+    color: #7aa2f7;
+}
+
+.paramsFunctionPattern {
+    color: #a8b0d4;
+}
+
+.conditional {
+    color: #9c7bd6;
+}
+
+.console {
+    color: #79a1f5;
+}
+
+.async {
+    color: #ba99f5;
+}
+
+.fetch-json-log {
+    color: #fdc46c;
+}
+
+.number {
+    color: #fb904d;
+}
+
+.delimiter {
+    color: #99bcf3;
+}
