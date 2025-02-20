@@ -10,7 +10,7 @@ class SnippyCopy {
             highlight: true,
             theme: 'dark',
             copyButtonText: '📋',
-            copyButtonStyle: { backgroundColor: '#3498db', color: 'white', fontSize: '10px' },
+            copyButtonStyle: {backgroundColor: '#3498db', color: 'white', fontSize: '10px'},
             errorMessage: "Impossible de copier",
             caption: '',
             ...options
@@ -42,7 +42,8 @@ class SnippyCopy {
         const codeElement = document.createElement("code");
         codeElement.classList.add(`language-${this.language}`);
 
-        codeElement.innerHTML = this.options.highlight ? this.highlightCode(this.code) : this.code;
+        const escapedCode = this.escapeHtml(this.code)
+        codeElement.innerHTML = this.options.highlight ? this.highlightCode(escapedCode) : escapedCode;
 
         if (!this.options.noCopy) {
             const copyButton = this.createCopyButton();
@@ -51,6 +52,10 @@ class SnippyCopy {
 
         pre.appendChild(codeElement);
         return pre;
+    }
+
+    escapeHtml(code) {
+        return code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
     createCopyButton() {
@@ -70,122 +75,182 @@ class SnippyCopy {
     }
 
     highlightCode(code) {
-        const patterns = {
-            numberPattern: /\b\d+(\.\d+)?([eE][+-]?\d+)?\b/g,
-            stringPattern: /(["'`])(?:\\.|(?!\1)[^\\])*\1/g,
-            fetchJsonLogPattern: /\b(fetch|json|log)\b/g,
-            asyncAwaitPattern: /(?<!\/\/.*)\b(async|await)\b(?!.*\*)/g,
-            returnPattern: /\breturn\b/g,
-            functionPattern: /\bfunction\b/g,
-            consolePattern: /\bconsole\b/g,
-            conditionals: /(?<!\/\/.*)\b(if|else)\b(?!.*\*)/g,
+        switch (this.language) {
+            case 'javascript':
+                return this.highlightJavaScript(code);
+            case 'html':
+                return this.highlightHTML(code);
+            default:
+                return code;
+        }
+    }
 
-            commentPattern: /\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm,
-            functionNamePattern: /\b(?:function\s+([a-zA-Z_$][a-zA-Z0-9_$]*))|(?:([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*function)(?!\s*\breturn\b)/g,
-            paramsFunctionPattern: /function\s+[a-zA-Z_$][a-zA-Z0-9_$]*\s*\(([^)]*)\)/g,
-            variablePattern: /\b(var|let|const)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g,
-            symbolsPattern: /(['"])(?:(?!\1)[^\\]|\\.)*\1|[()={};><*\-+.]/g,
+    highlightHTML(code) {
+        // Storage for tokens
+        const tokens = {
+            comments: [],
+            doctype: [],
+            strings: [],
+            tags: []
         };
 
-        const replacements = [
-            { pattern: patterns.numberPattern, className: "number" },
-            { pattern: patterns.stringPattern, className: "string" },
-            { pattern: patterns.fetchJsonLogPattern, className: "fetch-json-log" },
-            { pattern: patterns.asyncAwaitPattern, className: "async" },
-            { pattern: patterns.returnPattern, className: "keyword" },
-            { pattern: patterns.functionPattern, className: "function" },
-            { pattern: patterns.consolePattern, className: "console" },
-            { pattern: patterns.conditionals, className: "conditional" },
-        ];
-
-        let tempTokens = [];
-
-        // Temporarily remove comments to avoid affecting syntax highlighting
-        let comments = [];
-        code = code.replace(patterns.commentPattern, (match) => {
-            let token = `__COMMENT__${comments.length}__`;
-            comments.push({ token, match });
+        // Replace function to generate tokens
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
             return token;
-        });
+        };
 
-        // Match and replace variable names for highlighting
-        let variableMatches = code.match(patterns.variablePattern);
-        const variableNames = (variableMatches || []).map(match => match.split(/\s+/)[1].trim()).filter(Boolean);
-        const mergedArray = variableMatches.concat(variableNames);
+        // Initial HTML entities conversion
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-        mergedArray.forEach(varName => {
-            const regex = new RegExp(`(?<!['"])\\b${varName}\\b(?!['"])`, 'g');
-            code = code.replace(regex, (match) => {
-                let className = "keyword";
-                let token = `__TOKEN__${match}__`;
-                tempTokens.push({ token, match, className });
-                return token;
+        // Save comments with tokens
+        str = str.replace(/(&lt;!--[\s\S]*?--&gt;)/g, match =>
+            tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+        );
+
+        // Save DOCTYPE with tokens
+        str = str.replace(/(&lt;!DOCTYPE)\s+(html)(&gt;)/i, (match, doctype, html, closeTag) =>
+            tokenize('doctype', `<span style="color: #e6bd69;">${doctype}</span> <span style="color: #b9b9b9;">${html}</span><span style="color: #e6bd69;">${closeTag}</span>`)
+        );
+
+        // Save strings with tokens
+        str = str.replace(/"([^"]+)"/g, (match, content) =>
+            tokenize('strings', `"<span style="color: #a4c060;">${content}</span>"`)
+        );
+
+        // Highlight HTML tags and save with tokens
+        str = str.replace(/&lt;(\/?[a-zA-Z0-9]+)([^&]*?)&gt;/g, (match, tag, attributes) =>
+            tokenize('tags', `<span style="color: #f5758d;">&lt;${tag}</span>${attributes}<span style="color: #f5758d;">&gt;</span>`)
+        );
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({token, match}) => {
+                str = str.replace(token, match);
             });
         });
 
-        // Match and replace function names for highlighting
-        let functionNameMatches = code.match(patterns.functionNamePattern);
-        const functionNames = (functionNameMatches || []).map(match => match.split(/\s+/)[1].trim()).filter(Boolean);
-        functionNames.forEach(fnName => {
-            const regex = new RegExp(`(?<!['"])\\b${fnName}\\b(?!['"])`, 'g');
-            code = code.replace(regex, (match) => {
-                let cleanedMatch = match.trimStart();
-                let className = "functionName";
-                let token = `__TOKEN__${cleanedMatch}__`;
-                tempTokens.push({ token, match, className });
-                return token;
-            });
-        });
+        return str;
+    }
 
-        // Match and replace function parameters for highlighting
-        let paramsFunctionMatches = [...code.matchAll(patterns.paramsFunctionPattern)];
+    highlightJavaScript(code) {
+        // Define regex patterns for different JavaScript elements
+        const patterns = {
+            number: /\b\d+(\.\d+)?([eE][+-]?\d+)?\b/g,
+            string: /(["'`])(?:\\.|(?!\1)[^\\])*\1/g,
+            fetchJsonLog: /\b(fetch|json|log)\b/g,
+            asyncAwait: /(?<!\/\/.*)\b(async|await)\b(?!.*\*)/g,
+            keyword: /\b(return|function|var|let|const|if|else)\b/g,
+            console: /\bconsole\b/g,
+            comment: /\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm,
+            functionName: /\b(?:function\s+([a-zA-Z_$][a-zA-Z0-9_$]*))|(?:([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*function)(?!\s*\breturn\b)|(?:([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\()/g,
+            variableDeclaration: /\b(const|let|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\b/g,
+            variableUsage: /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\b(?!\s*\()/g,
+            symbols: /([()={};><*\-+.])/g,
+            functionParams: /(?:function\s*\w*\s*$$([^)]*)$$\s*{[^}]*}|(\w+\s*=\s*$$([^)]*)$$\s*=>))/g,
+        };
 
-        paramsFunctionMatches.forEach(match => {
-            const params = match[1]
-                .split(',')
-                .map(param => param.trim())
-                .filter(param => param.length > 0);
+        // Map patterns to CSS classes for styling
+        const classMap = {
+            number: "js-number",
+            string: "js-string",
+            fetchJsonLog: "js-fetch-json-log",
+            asyncAwait: "js-async",
+            keyword: "js-keyword",
+            console: "js-console",
+            comment: "js-comment",
+            functionName: "js-functionName",
+            variable: "js-variable",
+            symbols: "js-delimiter",
+            functionParam: "js-function-param",
+        };
 
-            params.forEach(param => {
-                const regex = new RegExp(`(?<!['"])\\b${param}\\b(?!['"])`, 'g');
-                code = code.replace(regex, (match) => {
-                    let cleanedMatch = match.trimStart();
-                    let className = "paramsFunctionPattern";
-                    let token = `__TOKEN__${cleanedMatch}__`;
-                    tempTokens.push({ token, match, className });
-                    return token;
+        // Initialize sets to store declared variables and functions
+        const declaredVariables = new Set();
+        const declaredFunctions = new Set();
+
+        let match;
+        let tokenCounter = 0;
+        const tokenMap = new Map();
+
+        // Process function parameters
+        while ((match = patterns.functionParams.exec(code)) !== null) {
+            const params = (match[1] || match[3])?.trim();
+            if (params) {
+                params.split(/\s*,\s*/).forEach(param => {
+                    const token = `___TOKEN_${tokenCounter++}___`;
+                    tokenMap.set(token, `<span class="js-function-param">${param}</span>`);
+                    code = code.replace(new RegExp(`\\b${param}\\b`, 'g'), token);
                 });
-            });
-        });
+            }
+        }
 
-        // Apply replacements for predefined patterns (e.g., keywords, numbers, etc.)
-        replacements.forEach(({ pattern, className }) => {
-            code = code.replace(pattern, (match) => {
-                let cleanedMatch = match.trimStart();
-                let token = `__TOKEN__${cleanedMatch}__`;
-                tempTokens.push({ token, match: cleanedMatch, className });
-                return token;
-            });
-        });
-
-        // Apply symbols highlighting, ignoring those inside strings
-        code = code.replace(patterns.symbolsPattern, (match, stringMarker) => {
-            if (!stringMarker) {
-                let token = `__TOKEN__${match}__`;
-                tempTokens.push({ token, match, className: "delimiter" });
-                return token;
+        // Identify and store declared variables
+        code = code.replace(patterns.variableDeclaration, (match, keyword, varName) => {
+            if (varName) {
+                declaredVariables.add(varName);
             }
             return match;
         });
 
-        // Restore comments in their original positions
-        comments.forEach(({ token, match }) => {
-            code = code.replace(token, `<span class="comment">${match}</span>`);
+        // Extract and store comments
+        const comments = [];
+        code = code.replace(patterns.comment, match => {
+            comments.push(match);
+            return `__COMMENT__${comments.length - 1}__`;
         });
 
-        // Replace tokens with corresponding highlighted spans
-        tempTokens.reverse().forEach(({ token, match, className }) => {
-            code = code.replace(token, `<span class="${className}">${match}</span>`);
+        // Extract and store strings
+        const strings = [];
+        code = code.replace(patterns.string, match => {
+            strings.push(match);
+            return `__STRING__${strings.length - 1}__`;
+        });
+
+        // Highlight symbols
+        code = code.replace(patterns.symbols, match => `<span class="${classMap.symbols}">${match}</span>`);
+
+        // Highlight function names and store them
+        code = code.replace(patterns.functionName, (match, name1, name2, name3) => {
+            const functionName = name1 || name2 || name3;
+            if (functionName) {
+                declaredFunctions.add(functionName);
+                return match.replace(functionName, `<span class="${classMap.functionName}">${functionName}</span>`);
+            }
+            return match;
+        });
+
+        // Highlight other patterns (except for specific ones)
+        Object.keys(patterns).forEach(key => {
+            if (!["variableUsage", "variableDeclaration", "string", "comment", "symbols", "keyword", "functionName", "functionParams"].includes(key)) {
+                code = code.replace(patterns[key], match => `<span class="${classMap[key]}">${match}</span>`);
+            }
+        });
+
+        // Highlight keywords
+        code = code.replace(patterns.keyword, match => `<span class="${classMap.keyword}">${match}</span>`);
+
+        // Highlight variable usage
+        code = code.replace(patterns.variableUsage, match => {
+            if (declaredVariables.has(match)) {
+                return `<span class="${classMap.variable}">${match}</span>`;
+            }
+            if (declaredFunctions.has(match)) {
+                return `<span class="${classMap.functionName}">${match}</span>`;
+            }
+            return match;
+        });
+
+        // Restore strings with highlighting
+        code = code.replace(/__STRING__(\d+)__/g, (_, index) => `<span class="${classMap.string}">${strings[Number.parseInt(index)]}</span>`);
+
+        // Restore comments with highlighting
+        code = code.replace(/__COMMENT__(\d+)__/g, (_, index) => `<span class="${classMap.comment}">${comments[Number.parseInt(index)]}</span>`);
+
+        // Restore function parameters with highlighting
+        tokenMap.forEach((value, token) => {
+            code = code.replace(new RegExp(token, 'g'), value);
         });
 
         return code;
@@ -207,6 +272,11 @@ class SnippyCopy {
                 'public', 'private', 'protected', 'class', 'interface', 'extends', 'implements',
                 'static', 'final', 'void', 'return', 'new', 'try', 'catch', 'finally', 'throw',
                 'throws', 'import', 'package', 'this', 'super', 'synchronized', 'volatile'
+            ],
+            html: [
+                'html', 'head', 'body', 'title', 'div', 'span', 'a', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                'ul', 'li', 'img', 'script', 'link', 'meta', 'style', 'form', 'input', 'button', 'table', 'tr',
+                'th', 'td', 'thead', 'tbody', 'footer', 'header', 'section', 'article', 'aside', 'nav'
             ]
         };
 

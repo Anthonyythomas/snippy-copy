@@ -67,50 +67,73 @@ code {
     color: #ffffff;
 }
 
-.keyword {
+.js-keyword {
     color: #9c7bd6;
 }
 
-.string {
+.js-string {
     color: #9cca64;
 }
 
-.comment {
+.js-comment {
     color: #5c6690;
 }
 
-.function {
+.js-function {
     color: #9c7bd6;
 }
 
-.functionName {
+.js-functionName {
     color: #7aa2f7;
 }
 
-.paramsFunctionPattern {
+.js-function-param {
     color: #a8b0d4;
 }
 
-.conditional {
+.js-conditional {
     color: #9c7bd6;
 }
 
-.console {
+.js-console {
     color: #79a1f5;
 }
 
-.async {
+.js-async {
     color: #ba99f5;
 }
 
-.fetch-json-log {
+.js-fetch-json-log {
     color: #fdc46c;
 }
 
-.number {
+.js-number {
     color: #fb904d;
 }
 
-.delimiter {
+.js-delimiter {
     color: #99bcf3;
+}
+
+.js-variable {
+    color: #ba99f5;
+}
+
+
+.html-tag {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+.html-closing-tag {
+    color: #e74c3c;
+}
+
+.html-string {
+    color: #f39c12; /* Orange */
+}
+
+.html-comment {
+    color: #95a5a6;
+    font-style: italic;
 }
