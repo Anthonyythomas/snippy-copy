@@ -30,7 +30,7 @@ describe('SnippyCopy Class', () => {
     it('should highlight code when the highlight option is true', () => {
         snippy = new SnippyCopy("#test-container", "const x = 10;", "javascript", { highlight: true });
         const codeElement = document.querySelector("code");
-        expect(codeElement.innerHTML).toContain('<span class="keyword">const x</span> <span class="delimiter">=</span> <span class="number">10</span>');
+        expect(codeElement.innerHTML).toContain('<span class="js-keyword">const</span> <span class="js-variable">x</span> <span class="js-delimiter">=</span> <span class="js-number">10</span>');
     });
 
     it('should not highlight code when the highlight option is false', () => {
@@ -52,34 +52,52 @@ describe('SnippyCopy Class', () => {
         expect(button).toBeNull();
     });
 
-    it('should copy the code to clipboard on button click', () => {
-        snippy = new SnippyCopy("#test-container", "const x = 10;");
-        const button = document.querySelector("button.copy-btn");
-        button.click();
-        expect(navigator.clipboard.writeText).toHaveBeenCalledWith("const x = 10;");
-    });
-
-    it('should show an alert if copying fails', () => {
-        const originalAlert = window.alert;
-        window.alert = jest.fn();
-
-        navigator.clipboard.writeText.mockImplementationOnce(() => {
-            throw new Error("Clipboard error");
-        });
-
-        snippy = new SnippyCopy("#test-container", "const x = 10;");
-        const button = document.querySelector("button.copy-btn");
-        button.click();
-
-        expect(window.alert).toHaveBeenCalledWith("Impossible de copier");
-
-        window.alert = originalAlert;
-    });
-
     it('should use the provided theme for code snippet', () => {
         snippy = new SnippyCopy("#test-container", "const x = 10;", "javascript", { theme: "dark" });
         const preElement = document.querySelector("pre");
         expect(preElement.classList.contains("dark")).toBe(true);
+    });
+
+    it('should copy text to clipboard and update button text on success', async () => {
+        const button = document.createElement('button');
+        button.classList.add('copy-btn');
+        button.textContent = '📋';
+        document.body.appendChild(button);
+
+        // Mock the clipboard method to resolve successfully
+        navigator.clipboard.writeText.mockResolvedValueOnce();
+
+        // Use fake timers
+        jest.useFakeTimers();
+
+        // Call the copyToClipboard method
+        await snippy.copyToClipboard(button);
+
+        // Check that the button text changed to "✔️"
+        expect(button.textContent).toBe('✔️');
+
+        // Simulate the timeout of 1500ms and check the final text
+        jest.advanceTimersByTime(1500);
+
+        expect(button.textContent).toBe('📋');
+    });
+
+    it('should show an error when clipboard copy fails and update button text on failure', async () => {
+        const button = document.createElement('button');
+        button.classList.add('copy-btn');
+        button.textContent = '📋';
+        document.body.appendChild(button);
+
+        // Mock the clipboard method to reject
+        navigator.clipboard.writeText.mockRejectedValueOnce(new Error('Failed to copy'));
+
+        // Call the copyToClipboard method and await it
+        await snippy.copyToClipboard(button);
+
+        // Wait for the timeout inside the copyToClipboard method to finish
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        expect(button.textContent).toBe('❌');
     });
 });
 

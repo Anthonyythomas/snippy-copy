@@ -50,14 +50,15 @@ Add the corresponding HTML element:
 ### `options` Object
 
 | Option            | Type    | Default Value | Description |
-|------------------|--------|---------------|-------------|
-| `noCopy`         | Boolean | `false`       | Disables the copy button. |
-| `highlight`      | Boolean | `true`        | Enables syntax highlighting. |
-| `theme`          | String  | `'light'`     | Sets the theme for the snippet ('light' or 'dark'). |
-| `copyButtonText` | String  | `'📋'`        | Text for the copy button. |
-| `copyButtonStyle`| Object  | `{}`          | Custom styles for the copy button. |
+|------------------|--------|--------------|-------------|
+| `noCopy`         | Boolean | `false`      | Disables the copy button. |
+| `highlight`      | Boolean | `true`       | Enables syntax highlighting. |
+| `theme`          | String  | `'light'`    | Sets the theme for the snippet ('light' or 'dark'). |
+| `copyButtonText` | String  | `'📋'`       | Text for the copy button. |
+| `copyButtonStyle`| Object  | `{}`         | Custom styles for the copy button. |
 | `errorMessage`   | String  | `'Unable to copy'` | Custom error message when copy fails. |
 | `caption`        | String  | `'Code Example'` | Text displayed as a caption above the code snippet. |
+| `showLineNumbers`| Boolean | `false` | Displays line numbers in the code snippet when set to `true`. |
 
 ## ✨ Example Usage
 
@@ -70,6 +71,7 @@ new SnippyCopy('#snippet-container', `const sum = (a, b) => a + b;`, 'javascript
     copyButtonStyle: { backgroundColor: '#3498db', color: 'white', fontSize: '14px' },
     errorMessage: 'Unable to copy the code',
     caption: 'Simple Sum Function',
+    showLineNumbers: true
 });
 ```
 

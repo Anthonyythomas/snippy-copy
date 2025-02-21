@@ -13,6 +13,7 @@ class SnippyCopy {
             copyButtonStyle: {backgroundColor: '#3498db', color: 'white', fontSize: '10px'},
             errorMessage: "Impossible de copier",
             caption: '',
+            showLineNumbers: false,
             ...options
         };
         this.keywords = this.getKeywordsForLanguage(language);
@@ -42,16 +43,64 @@ class SnippyCopy {
         const codeElement = document.createElement("code");
         codeElement.classList.add(`language-${this.language}`);
 
-        const escapedCode = this.escapeHtml(this.code)
-        codeElement.innerHTML = this.options.highlight ? this.highlightCode(escapedCode) : escapedCode;
+        let escapedCode = this.escapeHtml(this.code.trim());
+        if (this.options.highlight) {
+            escapedCode = this.highlightCode(escapedCode);
+        }
+
+        if (this.options.showLineNumbers) {
+            escapedCode = this.addLineNumbers(escapedCode);
+        }
+
+        codeElement.innerHTML = escapedCode;
 
         if (!this.options.noCopy) {
             const copyButton = this.createCopyButton();
+            copyButton.addEventListener("click", () => this.copyToClipboard(copyButton));
             pre.appendChild(copyButton);
         }
 
         pre.appendChild(codeElement);
         return pre;
+    }
+
+    addLineNumbers(code) {
+        // Add a wrapper div to contain both line numbers and code
+        const lines = code.split("\n");
+        const numberedLines = lines.map((line, index) =>
+            `<div class="code-line">
+                <span class="line-number" unselectable="on">${index + 1}</span>
+                <span class="line-content">${line}</span>
+             </div>`
+        ).join("");
+
+        // Add necessary CSS styles
+        const style = document.createElement('style');
+        style.textContent = `
+            pre code {
+                display: block;
+            }
+            .code-line {
+                display: flex;
+                white-space: pre;
+            }
+            .line-number {
+                user-select: none;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                padding-right: 1em;
+                opacity: 0.5;
+                text-align: right;
+                min-width: 2em;
+            }
+            .line-content {
+                flex: 1;
+            }
+        `;
+        document.head.appendChild(style);
+
+        return numberedLines;
     }
 
     escapeHtml(code) {
@@ -114,10 +163,11 @@ class SnippyCopy {
             tokenize('doctype', `<span style="color: #e6bd69;">${doctype}</span> <span style="color: #b9b9b9;">${html}</span><span style="color: #e6bd69;">${closeTag}</span>`)
         );
 
-        // Save strings with tokens
-        str = str.replace(/"([^"]+)"/g, (match, content) =>
-            tokenize('strings', `"<span style="color: #a4c060;">${content}</span>"`)
-        );
+        // Save strings with tokens - Now handling both quoted and unquoted attribute values
+        str = str.replace(/=("([^"]*)"|\s*([^\s>]+))/g, (match, value, quoted, unquoted) => {
+            const content = quoted || unquoted;
+            return `=<span style="color: #4CAF50;">"${content}"</span>`;
+        });
 
         // Highlight HTML tags and save with tokens
         str = str.replace(/&lt;(\/?[a-zA-Z0-9]+)([^&]*?)&gt;/g, (match, tag, attributes) =>
@@ -284,13 +334,23 @@ class SnippyCopy {
     }
 
     copyToClipboard(button) {
-        try {
-            navigator.clipboard.writeText(this.code);
-            alert("Code copié avec succès !");
-        } catch (e) {
-            alert(this.options.errorMessage);
-        }
+        navigator.clipboard.writeText(this.code)
+            .then(() => {
+                button.textContent = "✔️";
+                setTimeout(() => {
+                    button.textContent = "📋";
+                }, 1500);
+            })
+            .catch(() => {
+                console.log('Failed to copy');
+                button.textContent = "❌";
+                setTimeout(() => {
+                    button.textContent = "📋";
+                }, 1500);
+                alert("Impossible de copier");
+            });
     }
+
 }
 
 export default SnippyCopy;
