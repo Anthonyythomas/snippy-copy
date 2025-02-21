@@ -36,6 +36,21 @@ class SnippyCopy {
         container.appendChild(snippet);
     }
 
+    cleanCode(code) {
+        const lines = code.split('\n');
+
+        // Find the first non-empty line to determine the common indentation
+        const firstNonEmptyLine = lines.find(line => line.trim() !== '');
+        if (!firstNonEmptyLine) return ''; // Return an empty string if all lines are empty
+
+        const indentation = firstNonEmptyLine.match(/^\s*/)[0].length; // Get leading spaces count
+
+        return lines
+            .map(line => line.startsWith(' ') ? line.slice(indentation) : line) // Remove common indentation
+            .join('\n')
+            .trim();
+    }
+
     createSnippet() {
         const pre = document.createElement("pre");
         pre.classList.add(this.options.theme);
@@ -43,7 +58,8 @@ class SnippyCopy {
         const codeElement = document.createElement("code");
         codeElement.classList.add(`language-${this.language}`);
 
-        let escapedCode = this.escapeHtml(this.code.trim());
+        let cleanCode = this.cleanCode(this.code)
+        let escapedCode = this.escapeHtml(cleanCode);
         if (this.options.highlight) {
             escapedCode = this.highlightCode(escapedCode);
         }
@@ -65,42 +81,13 @@ class SnippyCopy {
     }
 
     addLineNumbers(code) {
-        // Add a wrapper div to contain both line numbers and code
+        // Split into lines and map to create numbered lines with minimal spacing
         const lines = code.split("\n");
         const numberedLines = lines.map((line, index) =>
-            `<div class="code-line">
-                <span class="line-number" unselectable="on">${index + 1}</span>
-                <span class="line-content">${line}</span>
-             </div>`
+            `<div class="code-line"><span class="line-number" unselectable="on">${index + 1}</span><span class="line-content">${line}</span></div>`
         ).join("");
 
-        // Add necessary CSS styles
-        const style = document.createElement('style');
-        style.textContent = `
-            pre code {
-                display: block;
-            }
-            .code-line {
-                display: flex;
-                white-space: pre;
-            }
-            .line-number {
-                user-select: none;
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                -ms-user-select: none;
-                padding-right: 1em;
-                opacity: 0.5;
-                text-align: right;
-                min-width: 2em;
-            }
-            .line-content {
-                flex: 1;
-            }
-        `;
-        document.head.appendChild(style);
-
-        return numberedLines;
+        return `<code class="language-javascript">${numberedLines}</code>`;
     }
 
     escapeHtml(code) {
@@ -146,7 +133,7 @@ class SnippyCopy {
         // Replace function to generate tokens
         const tokenize = (type, match) => {
             const token = `__${type}_${tokens[type].length}__`;
-            tokens[type].push({ token, match });
+            tokens[type].push({token, match});
             return token;
         };
 
@@ -185,7 +172,6 @@ class SnippyCopy {
     }
 
     highlightJavaScript(code) {
-        // Define regex patterns for different JavaScript elements
         const patterns = {
             number: /\b\d+(\.\d+)?([eE][+-]?\d+)?\b/g,
             string: /(["'`])(?:\\.|(?!\1)[^\\])*\1/g,
@@ -193,15 +179,15 @@ class SnippyCopy {
             asyncAwait: /(?<!\/\/.*)\b(async|await)\b(?!.*\*)/g,
             keyword: /\b(return|function|var|let|const|if|else)\b/g,
             console: /\bconsole\b/g,
-            comment: /\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm,
+            comment: /\/\*[\s\S]*?\*\/|\/\/.*$/gm,
             functionName: /\b(?:function\s+([a-zA-Z_$][a-zA-Z0-9_$]*))|(?:([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*function)(?!\s*\breturn\b)|(?:([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\()/g,
             variableDeclaration: /\b(const|let|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\b/g,
             variableUsage: /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\b(?!\s*\()/g,
             symbols: /([()={};><*\-+.])/g,
-            functionParams: /(?:function\s*\w*\s*$$([^)]*)$$\s*{[^}]*}|(\w+\s*=\s*$$([^)]*)$$\s*=>))/g,
+            functionParams: /(?:function\s*\w*\s*\(([^)]*)\)\s*{[^}]*}|(\w+\s*=\s*\(([^)]*)\)\s*=>))/g,
+
         };
 
-        // Map patterns to CSS classes for styling
         const classMap = {
             number: "js-number",
             string: "js-string",
@@ -213,18 +199,16 @@ class SnippyCopy {
             functionName: "js-functionName",
             variable: "js-variable",
             symbols: "js-delimiter",
-            functionParam: "js-function-param",
+            functionParam: "js-param-red",
         };
 
-        // Initialize sets to store declared variables and functions
         const declaredVariables = new Set();
         const declaredFunctions = new Set();
+        const functionParams = new Set();
 
         let match;
         let tokenCounter = 0;
         const tokenMap = new Map();
-
-        // Process function parameters
         while ((match = patterns.functionParams.exec(code)) !== null) {
             const params = (match[1] || match[3])?.trim();
             if (params) {
@@ -236,32 +220,30 @@ class SnippyCopy {
             }
         }
 
-        // Identify and store declared variables
-        code = code.replace(patterns.variableDeclaration, (match, keyword, varName) => {
-            if (varName) {
-                declaredVariables.add(varName);
-            }
-            return match;
-        });
 
-        // Extract and store comments
-        const comments = [];
-        code = code.replace(patterns.comment, match => {
-            comments.push(match);
-            return `__COMMENT__${comments.length - 1}__`;
-        });
-
-        // Extract and store strings
         const strings = [];
         code = code.replace(patterns.string, match => {
             strings.push(match);
             return `__STRING__${strings.length - 1}__`;
         });
 
-        // Highlight symbols
+        const comments = [];
+        code = code.replace(patterns.comment, match => {
+            comments.push(match);
+            return `__COMMENT__${comments.length - 1}__`;
+        });
+
+        code = code.replace(patterns.functionDeclaration, (match, funcName, params) => {
+            if (params) {
+                params.split(',').forEach(param => {
+                    functionParams.add(param.trim());
+                });
+            }
+            return match;
+        });
+
         code = code.replace(patterns.symbols, match => `<span class="${classMap.symbols}">${match}</span>`);
 
-        // Highlight function names and store them
         code = code.replace(patterns.functionName, (match, name1, name2, name3) => {
             const functionName = name1 || name2 || name3;
             if (functionName) {
@@ -271,17 +253,26 @@ class SnippyCopy {
             return match;
         });
 
-        // Highlight other patterns (except for specific ones)
+        code = code.replace(patterns.variableDeclaration, (match, keyword, varName) => {
+            if (varName) {
+                declaredVariables.add(varName);
+            }
+            return `<span class="${classMap.keyword}">${keyword}</span> <span class="${classMap.variable}">${varName}</span>`;
+        });
+
         Object.keys(patterns).forEach(key => {
-            if (!["variableUsage", "variableDeclaration", "string", "comment", "symbols", "keyword", "functionName", "functionParams"].includes(key)) {
+            if (!["variableUsage", "variableDeclaration", "string", "comment", "symbols", "keyword", "functionName", "functionDeclaration"].includes(key)) {
                 code = code.replace(patterns[key], match => `<span class="${classMap[key]}">${match}</span>`);
             }
         });
 
-        // Highlight keywords
         code = code.replace(patterns.keyword, match => `<span class="${classMap.keyword}">${match}</span>`);
 
-        // Highlight variable usage
+        functionParams.forEach(param => {
+            const paramRegex = new RegExp(`\\b${param}\\b`, 'g');
+            code = code.replace(paramRegex, `<span class="${classMap.functionParam}">${param}</span>`);
+        });
+
         code = code.replace(patterns.variableUsage, match => {
             if (declaredVariables.has(match)) {
                 return `<span class="${classMap.variable}">${match}</span>`;
@@ -292,13 +283,14 @@ class SnippyCopy {
             return match;
         });
 
-        // Restore strings with highlighting
-        code = code.replace(/__STRING__(\d+)__/g, (_, index) => `<span class="${classMap.string}">${strings[Number.parseInt(index)]}</span>`);
+        code = code.replace(/__COMMENT__(\d+)__/g, (_, index) =>
+            `<span class="${classMap.comment}">${comments[Number.parseInt(index)]}</span>`
+        );
 
-        // Restore comments with highlighting
-        code = code.replace(/__COMMENT__(\d+)__/g, (_, index) => `<span class="${classMap.comment}">${comments[Number.parseInt(index)]}</span>`);
+        code = code.replace(/__STRING__(\d+)__/g, (_, index) =>
+            `<span class="${classMap.string}">${strings[Number.parseInt(index)]}</span>`
+        );
 
-        // Restore function parameters with highlighting
         tokenMap.forEach((value, token) => {
             code = code.replace(new RegExp(token, 'g'), value);
         });

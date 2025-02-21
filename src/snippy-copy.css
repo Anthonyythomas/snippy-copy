@@ -137,3 +137,28 @@ code {
     color: #95a5a6;
     font-style: italic;
 }
+
+
+pre code {
+    display: block;
+}
+.code-line {
+    display: flex;
+    white-space: pre;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+}
+.line-number {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    padding-right: 1em;
+    opacity: 0.5;
+    text-align: right;
+    min-width: 2em;
+}
+.line-content {
+    flex: 1;
+}
