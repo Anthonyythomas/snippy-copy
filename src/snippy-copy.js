@@ -59,16 +59,15 @@ class SnippyCopy {
         codeElement.classList.add(`language-${this.language}`);
 
         let cleanCode = this.cleanCode(this.code)
-        let escapedCode = this.escapeHtml(cleanCode);
         if (this.options.highlight) {
-            escapedCode = this.highlightCode(escapedCode);
+            cleanCode = this.highlightCode(cleanCode);
         }
 
         if (this.options.showLineNumbers) {
-            escapedCode = this.addLineNumbers(escapedCode);
+            cleanCode = this.addLineNumbers(cleanCode);
         }
 
-        codeElement.innerHTML = escapedCode;
+        codeElement.innerHTML = cleanCode;
 
         if (!this.options.noCopy) {
             const copyButton = this.createCopyButton();
@@ -88,10 +87,6 @@ class SnippyCopy {
         ).join("");
 
         return `<code class="language-javascript">${numberedLines}</code>`;
-    }
-
-    escapeHtml(code) {
-        return code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
     createCopyButton() {
@@ -116,6 +111,8 @@ class SnippyCopy {
                 return this.highlightJavaScript(code);
             case 'html':
                 return this.highlightHTML(code);
+            case 'css':
+                return this.highlightCSS(code);
             default:
                 return code;
         }
@@ -133,37 +130,103 @@ class SnippyCopy {
         // Replace function to generate tokens
         const tokenize = (type, match) => {
             const token = `__${type}_${tokens[type].length}__`;
-            tokens[type].push({token, match});
+            tokens[type].push({ token, match });
             return token;
         };
 
-        // Initial HTML entities conversion
+        // Convert special HTML characters
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Function to highlight comments (applied after conversion)
+        const highlightComments = (str) => {
+            return str.replace(/(&lt;!--[\s\S]*?--&gt;)/g, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Function to highlight DOCTYPE
+        const highlightDoctype = (str) => {
+            return str.replace(/(&lt;!DOCTYPE\b[^&]*?&gt;)/gi, match =>
+                tokenize('doctype', `<span style="color: #e6bd69;">${match}</span>`)
+            );
+        };
+        str = highlightDoctype(str);
+
+        // Function to highlight attribute strings (quoted and unquoted)
+        const highlightAttributes = (str) => {
+            return str.replace(/=("([^"]*)"|\s*([^\s>]+))/g, (match, value, quoted, unquoted) => {
+                const content = quoted || unquoted;
+                return `=<span style="color: #4CAF50;">"${content}"</span>`;
+            });
+        };
+        str = highlightAttributes(str);
+
+        // Function to highlight HTML tags
+        const highlightTags = (str) => {
+            return str.replace(/&lt;(\/?[a-zA-Z0-9]+)([^&]*?)&gt;/g, (match, tag, attributes) =>
+                tokenize('tags', `<span style="color: #f5758d;">&lt;${tag}${attributes}&gt;</span>`)
+            );
+        };
+        str = highlightTags(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightCSS(code) {
+        // Storage for tokens
+        const tokens = {
+            comments: [],
+            properties: [],
+            values: [],
+            selectors: [],
+            functions: []
+        };
+
+        // Replace function to generate tokens
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        // Initial escaping of special characters
         let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
         // Save comments with tokens
-        str = str.replace(/(&lt;!--[\s\S]*?--&gt;)/g, match =>
+        str = str.replace(/(\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/)/g, match =>
             tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
         );
 
-        // Save DOCTYPE with tokens
-        str = str.replace(/(&lt;!DOCTYPE)\s+(html)(&gt;)/i, (match, doctype, html, closeTag) =>
-            tokenize('doctype', `<span style="color: #e6bd69;">${doctype}</span> <span style="color: #b9b9b9;">${html}</span><span style="color: #e6bd69;">${closeTag}</span>`)
+        // Save CSS properties with tokens (ensuring `.line-content` remains separate)
+        str = str.replace(/(\.[a-zA-Z-]+)(\s*\{)/g, (match, selector, brace) =>
+            tokenize('selectors', `<span style="color: #f5758d;">${selector}</span>${brace}`)
         );
 
-        // Save strings with tokens - Now handling both quoted and unquoted attribute values
-        str = str.replace(/=("([^"]*)"|\s*([^\s>]+))/g, (match, value, quoted, unquoted) => {
-            const content = quoted || unquoted;
-            return `=<span style="color: #4CAF50;">"${content}"</span>`;
+        str = str.replace(/([a-zA-Z-]+)(\s*:\s*)/g, (match, prop, colon) =>
+            tokenize('properties', `<span style="color: #e6bd69;">${prop}</span>${colon}`)
+        );
+
+        // Save values with tokens (numbers, units, hex colors, and keywords)
+        str = str.replace(/:\s*([0-9]+(\.[0-9]+)?(px|em|rem|%|vh|vw|s)?|#[0-9a-fA-F]{3,6})/g, (match, value) => {
+            return `: <span style="color: #4CAF50;">${value}</span>`;
         });
 
-        // Highlight HTML tags and save with tokens
-        str = str.replace(/&lt;(\/?[a-zA-Z0-9]+)([^&]*?)&gt;/g, (match, tag, attributes) =>
-            tokenize('tags', `<span style="color: #f5758d;">&lt;${tag}</span>${attributes}<span style="color: #f5758d;">&gt;</span>`)
+        // Save CSS functions with tokens
+        str = str.replace(/([a-zA-Z-]+)\s*\(([^)]*)\)/g, (match, func, params) =>
+            tokenize('functions', `<span style="color: #b9b9b9;">${func}</span>(<span style="color: #4CAF50;">${params}</span>)`)
         );
 
         // Restore all tokens
         Object.entries(tokens).forEach(([type, replacements]) => {
-            replacements.forEach(({token, match}) => {
+            replacements.forEach(({ token, match }) => {
                 str = str.replace(token, match);
             });
         });
@@ -219,7 +282,6 @@ class SnippyCopy {
                 });
             }
         }
-
 
         const strings = [];
         code = code.replace(patterns.string, match => {
