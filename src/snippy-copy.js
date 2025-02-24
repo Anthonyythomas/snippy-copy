@@ -10,10 +10,15 @@ class SnippyCopy {
             highlight: true,
             theme: 'dark',
             copyButtonText: '📋',
-            copyButtonStyle: {backgroundColor: '#3498db', color: 'white', fontSize: '10px'},
+            copyButtonStyle: { backgroundColor: '#3498db', color: 'white', fontSize: '10px' },
             errorMessage: "Impossible de copier",
             caption: '',
             showLineNumbers: false,
+            highlightLineNumbers: [],
+            highlightLineColor: '',
+            copySuccessMessage: 'Code copied successfully! 🎉',
+            fontSize: '14px',
+            lineHeight: '1.5',
             ...options
         };
         this.keywords = this.getKeywordsForLanguage(language);
@@ -69,6 +74,10 @@ class SnippyCopy {
 
         codeElement.innerHTML = cleanCode;
 
+        // Apply custom font size and line height
+        codeElement.style.fontSize = this.options.fontSize;
+        codeElement.style.lineHeight = this.options.lineHeight;
+
         if (!this.options.noCopy) {
             const copyButton = this.createCopyButton();
             copyButton.addEventListener("click", () => this.copyToClipboard(copyButton));
@@ -80,11 +89,19 @@ class SnippyCopy {
     }
 
     addLineNumbers(code) {
-        // Split into lines and map to create numbered lines with minimal spacing
         const lines = code.split("\n");
-        const numberedLines = lines.map((line, index) =>
-            `<div class="code-line"><span class="line-number" unselectable="on">${index + 1}</span><span class="line-content">${line}</span></div>`
-        ).join("");
+
+        const numberedLines = lines.map((line, index) => {
+            const lineNumber = index + 1;
+            const isHighlighted = this.options.highlightLineNumbers.includes(lineNumber);
+
+            const lineStyle = isHighlighted ? `background-color: ${this.options.highlightLineColor};` : '';
+
+            return `<div class="code-line" style="${lineStyle}">
+                    <span class="line-number" unselectable="on" style="color: ${isHighlighted ? '#ffcc00' : '#aaa'};">${lineNumber}</span>
+                    <span class="line-content">${line}</span>
+                </div>`;
+        }).join("");
 
         return `<code class="language-javascript">${numberedLines}</code>`;
     }
@@ -101,7 +118,6 @@ class SnippyCopy {
 
         Object.assign(button.style, this.options.copyButtonStyle);
 
-        button.addEventListener("click", () => this.copyToClipboard(button));
         return button;
     }
 
@@ -2098,19 +2114,47 @@ class SnippyCopy {
     copyToClipboard(button) {
         navigator.clipboard.writeText(this.code)
             .then(() => {
+                // Change button text to show success
                 button.textContent = "✔️";
                 setTimeout(() => {
                     button.textContent = "📋";
                 }, 1500);
+
+                // Display custom success message (you can show this in a toast or alert)
+                this.showCopyMessage(this.options.copySuccessMessage);
             })
             .catch(() => {
+                // Show failure on button
                 console.log('Failed to copy');
                 button.textContent = "❌";
                 setTimeout(() => {
                     button.textContent = "📋";
                 }, 1500);
-                alert("Impossible de copier");
+
+                // Display the error message
+                this.showCopyMessage(this.options.errorMessage);
             });
+    }
+
+    showCopyMessage(message) {
+        const messageBox = document.createElement("div");
+        messageBox.textContent = message;
+        messageBox.style.position = "fixed";
+        messageBox.style.bottom = "20px";
+        messageBox.style.left = "50%";
+        messageBox.style.transform = "translateX(-50%)";
+        messageBox.style.backgroundColor = "#333";
+        messageBox.style.color = "#fff";
+        messageBox.style.padding = "10px 20px";
+        messageBox.style.borderRadius = "5px";
+        messageBox.style.fontSize = "14px";
+        messageBox.style.zIndex = 9999;
+
+        document.body.appendChild(messageBox);
+
+        setTimeout(() => {
+            document.body.removeChild(messageBox);
+        }, 3000);
     }
 
 }

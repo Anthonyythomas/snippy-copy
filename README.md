@@ -1,6 +1,8 @@
 # SnippyCopy
 
-`SnippyCopy` is a lightweight JavaScript library that allows you to display code snippets with syntax highlighting and a customizable copy-to-clipboard button. It supports different themes, customizable button styles, and error messages. Perfect for blogs, tutorials, and technical documentation pages!
+`SnippyCopy` is a lightweight JavaScript library that allows you to display code snippets with syntax highlighting and a
+customizable copy-to-clipboard button. It supports different themes, customizable button styles, and error messages.
+Perfect for blogs, tutorials, and technical documentation pages!
 
 ## Installation
 
@@ -24,7 +26,7 @@ new SnippyCopy('#snippet-container', code, 'javascript', {
     highlight: true,
     theme: 'dark',
     copyButtonText: 'Copy',
-    copyButtonStyle: { backgroundColor: '#27ae60', color: 'white', fontSize: '16px' },
+    copyButtonStyle: {backgroundColor: '#27ae60', color: 'white', fontSize: '16px'},
     errorMessage: 'Unable to copy the code',
     caption: 'JavaScript Code Example',
 });
@@ -33,6 +35,7 @@ new SnippyCopy('#snippet-container', code, 'javascript', {
 Add the corresponding HTML element:
 
 ```html
+
 <div id="snippet-container"></div>
 ```
 
@@ -49,16 +52,21 @@ Add the corresponding HTML element:
 
 ### `options` Object
 
-| Option            | Type    | Default Value | Description |
-|------------------|--------|--------------|-------------|
-| `noCopy`         | Boolean | `false`      | Disables the copy button. |
-| `highlight`      | Boolean | `true`       | Enables syntax highlighting. |
-| `theme`          | String  | `'light'`    | Sets the theme for the snippet ('light' or 'dark'). |
-| `copyButtonText` | String  | `'📋'`       | Text for the copy button. |
-| `copyButtonStyle`| Object  | `{}`         | Custom styles for the copy button. |
-| `errorMessage`   | String  | `'Unable to copy'` | Custom error message when copy fails. |
-| `caption`        | String  | `'Code Example'` | Text displayed as a caption above the code snippet. |
+| Option            | Type    | Default Value | Description                                                   |
+|------------------|---------|------|---------------------------------------------------------------|
+| `noCopy`         | Boolean | `false` | Disables the copy button.                                     |
+| `highlight`      | Boolean | `true` | Enables syntax highlighting.                                  |
+| `theme`          | String  | `'light'` | Sets the theme for the code snippet (`'light'` or `'dark'`).  |
+| `copyButtonText` | String  | `'📋'` | Text displayed on the copy button.                            |
+| `copyButtonStyle`| Object  | `{}` | Custom styles for the copy button.                            |
+| `errorMessage`   | String  | `'Unable to copy'` | Custom error message when copying fails.                      |
+| `caption`        | String  | `''` | Text displayed as a caption above the code snippet.           |
 | `showLineNumbers`| Boolean | `false` | Displays line numbers in the code snippet when set to `true`. |
+| `highlightLineNumbers`| Array   | `[]` | List of line numbers to highlight (e.g., `[2, 4, 6]`). This option works when `showLineNumbers` is enabled        |
+| `highlightLineColor`| String   | `''` | Color used to highlight the specified line numbers in `highlightLineNumbers`.       |
+| `copySuccessMessage`| String  | `'Code copied successfully! 🎉'` | Message shown after a successful copy.                        |
+| `fontSize`| String  | `'14px'` | Font size of the code.                                        |
+| `lineHeight`| String  | `'1.6'` | Line height of the code.                                      |
 
 ## ✨ Example Usage
 
@@ -68,16 +76,19 @@ new SnippyCopy('#snippet-container', `const sum = (a, b) => a + b;`, 'javascript
     highlight: true,
     theme: 'dark',
     copyButtonText: 'Copy',
-    copyButtonStyle: { backgroundColor: '#3498db', color: 'white', fontSize: '14px' },
+    copyButtonStyle: {backgroundColor: '#3498db', color: 'white', fontSize: '14px'},
     errorMessage: 'Unable to copy the code',
     caption: 'Simple Sum Function',
-    showLineNumbers: true
+    showLineNumbers: true,
+    highlightLineNumbers: [1],
+    highlightLineColor: '#ff6347'
 });
 ```
 
 Add the corresponding HTML container:
 
 ```html
+
 <div id="snippet-container"></div>
 ```
 

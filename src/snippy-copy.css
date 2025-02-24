@@ -145,7 +145,6 @@ pre code {
 .code-line {
     display: flex;
     white-space: pre;
-    line-height: 1.5;
     margin: 0;
     padding: 0;
 }

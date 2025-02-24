@@ -1,6 +1,6 @@
 {
   "name": "snippy-copy",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "dist/snippy-copy.js",
   "module": "dist/snippy-copy.esm.js",
   "exports": {
