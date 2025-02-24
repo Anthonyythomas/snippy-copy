@@ -113,6 +113,60 @@ class SnippyCopy {
                 return this.highlightHTML(code);
             case 'css':
                 return this.highlightCSS(code);
+            case 'python':
+                return this.highlightPython(code);
+            case 'php':
+                return this.highlightPHP(code);
+            case 'java':
+                return this.highlightJava(code);
+            case 'c':
+                return this.highlightC(code);
+            case 'C++':
+                return this.highlightCpp(code);
+            case 'ruby':
+                return this.highlightRuby(code);
+            case 'swift':
+                return this.highlightSwift(code);
+            case 'go':
+                return this.highlightGo(code);
+            case 'rust':
+                return this.highlightRust(code);
+            case 'kotli':
+                return this.highlightKotlin(code);
+            case 'scala':
+                return this.highlightScala(code);
+            case 'lua':
+                return this.highlightLua(code);
+            case 'perl':
+                return this.highlightPerl(code);
+            case 'typeScript':
+                return this.highlightTypeScript(code);
+            case 'objective-c':
+                return this.highlightObjectiveC(code);
+            case 'bash':
+                return this.highlightBash(code);
+            case 'haskell':
+                return this.highlightHaskell(code);
+            case 'dart':
+                return this.highlightDart(code);
+            case 'elixir':
+                return this.highlightElixir(code);
+            case 'f#':
+                return this.highlightFSharp(code);
+            case 'vhdl':
+                return this.highlightVHDL(code);
+            case 'sql':
+                return this.highlightSQL(code);
+            case 'r':
+                return this.highlightR(code);
+            case 'vala':
+                return this.highlightVala(code);
+            case 'julia':
+                return this.highlightJulia(code);
+            case 'nim':
+                return this.highlightNim(code);
+            case 'powershell':
+                return this.highlightPowerShell(code);
             default:
                 return code;
         }
@@ -360,6 +414,1551 @@ class SnippyCopy {
         return code;
     }
 
+    highlightPython(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(#.*?$)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings (single and double quotes, including triple quotes)
+        const highlightStrings = (str) => {
+            return str.replace(/("""[\s\S]*?"""|'''[\s\S]*?'''|"[^"]*"|'[^']*')/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Python keywords
+        const highlightKeywords = (str) => {
+            const pythonKeywords = this.getKeywordsForLanguage(this.language);
+
+            const regex = new RegExp(`\\b(${pythonKeywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Highlight function names
+        const highlightFunctions = (str) => {
+            return str.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, match =>
+                tokenize('functions', `<span style="color: #e6bd69;">${match}</span>`)
+            );
+        };
+        str = highlightFunctions(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightPHP(code) {
+        // Storage for tokens
+        const tokens = {
+            comments: [],
+            strings: [],
+            variables: [],
+            functions: [],
+            keywords: []
+        };
+
+        // Replace function to generate tokens
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        // Convert special HTML characters
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Function to highlight PHP comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/g, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Function to highlight PHP strings (both single and double quotes)
+        const highlightStrings = (str) => {
+            return str.replace(/(["'])((?:\\.|[^\\])*?)\1/g, (match, quote, content) =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Function to highlight PHP variables
+        const highlightVariables = (str) => {
+            return str.replace(/\$[a-zA-Z_][a-zA-Z0-9_]*/g, match =>
+                tokenize('variables', `<span style="color: #e6bd69;">${match}</span>`)
+            );
+        };
+        str = highlightVariables(str);
+
+        // Function to highlight PHP functions
+        const highlightFunctions = (str) => {
+            return str.replace(/\b[a-zA-Z_][a-zA-Z0-9_]*\s*\(/g, match =>
+                tokenize('functions', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightFunctions(str);
+
+        // Function to highlight PHP keywords
+        const highlightKeywords = (str) => {
+            const phpKeywords = this.getKeywordsForLanguage(this.language);
+            const keywordRegex = new RegExp(`\\b(${phpKeywords.join('|')})\\b`, 'g');
+            return str.replace(keywordRegex, match =>
+                tokenize('keywords', `<span style="color: #ff4500;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightJava(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/g, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings (double quotes)
+        const highlightStrings = (str) => {
+            return str.replace(/"([^"]*)"/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Java keywords
+        const highlightKeywords = (str) => {
+            const javaKeywords = this.getKeywordsForLanguage('java');
+
+            const regex = new RegExp(`\\b(${javaKeywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Highlight function names (method declarations and calls)
+        const highlightFunctions = (str) => {
+            return str.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, match =>
+                tokenize('functions', `<span style="color: #e6bd69;">${match}</span>`)
+            );
+        };
+        str = highlightFunctions(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightC(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/g, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings (double quotes)
+        const highlightStrings = (str) => {
+            return str.replace(/"([^"]*)"/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight C keywords
+        const highlightKeywords = (str) => {
+            const cKeywords = this.getKeywordsForLanguage('c');
+
+            const regex = new RegExp(`\\b(${cKeywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Highlight function names
+        const highlightFunctions = (str) => {
+            return str.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, match =>
+                tokenize('functions', `<span style="color: #e6bd69;">${match}</span>`)
+            );
+        };
+        str = highlightFunctions(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightCpp(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/g, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings (double quotes)
+        const highlightStrings = (str) => {
+            return str.replace(/"([^"]*)"/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight C++ keywords
+        const highlightKeywords = (str) => {
+            const cppKeywords = this.getKeywordsForLanguage('cpp');
+
+            const regex = new RegExp(`\\b(${cppKeywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Highlight function names
+        const highlightFunctions = (str) => {
+            return str.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, match =>
+                tokenize('functions', `<span style="color: #e6bd69;">${match}</span>`)
+            );
+        };
+        str = highlightFunctions(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightRuby(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(#.*?$)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings (single and double quotes)
+        const highlightStrings = (str) => {
+            return str.replace(/"([^"]*)"|'([^']*)'/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Ruby keywords
+        const highlightKeywords = (str) => {
+            const rubyKeywords = this.getKeywordsForLanguage('ruby');
+
+            const regex = new RegExp(`\\b(${rubyKeywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Highlight function names
+        const highlightFunctions = (str) => {
+            return str.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, match =>
+                tokenize('functions', `<span style="color: #e6bd69;">${match}</span>`)
+            );
+        };
+        str = highlightFunctions(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightSwift(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/g, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings (double quotes)
+        const highlightStrings = (str) => {
+            return str.replace(/"([^"]*)"/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Swift keywords
+        const highlightKeywords = (str) => {
+            const swiftKeywords = this.getKeywordsForLanguage('swift');
+
+            const regex = new RegExp(`\\b(${swiftKeywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Highlight function names
+        const highlightFunctions = (str) => {
+            return str.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, match =>
+                tokenize('functions', `<span style="color: #e6bd69;">${match}</span>`)
+            );
+        };
+        str = highlightFunctions(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightGo(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/g, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings (double quotes)
+        const highlightStrings = (str) => {
+            return str.replace(/"([^"]*)"/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Go keywords
+        const highlightKeywords = (str) => {
+            const goKeywords = this.getKeywordsForLanguage('go');
+
+            const regex = new RegExp(`\\b(${goKeywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Highlight function names
+        const highlightFunctions = (str) => {
+            return str.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, match =>
+                tokenize('functions', `<span style="color: #e6bd69;">${match}</span>`)
+            );
+        };
+        str = highlightFunctions(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightRust(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/g, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings (double quotes)
+        const highlightStrings = (str) => {
+            return str.replace(/"([^"]*)"/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Rust keywords
+        const highlightKeywords = (str) => {
+            const rustKeywords = this.getKeywordsForLanguage('rust');
+
+            const regex = new RegExp(`\\b(${rustKeywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Highlight function names
+        const highlightFunctions = (str) => {
+            return str.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, match =>
+                tokenize('functions', `<span style="color: #e6bd69;">${match}</span>`)
+            );
+        };
+        str = highlightFunctions(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightKotlin(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/g, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings (double quotes)
+        const highlightStrings = (str) => {
+            return str.replace(/"([^"]*)"/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Kotlin keywords
+        const highlightKeywords = (str) => {
+            const kotlinKeywords = this.getKeywordsForLanguage('kotlin');
+
+            const regex = new RegExp(`\\b(${kotlinKeywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Highlight function names
+        const highlightFunctions = (str) => {
+            return str.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, match =>
+                tokenize('functions', `<span style="color: #e6bd69;">${match}</span>`)
+            );
+        };
+        str = highlightFunctions(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightScala(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\/.*?$|\/\*[\s\S]*?\*\/)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/("""[\s\S]*?"""|'''[\s\S]*?'''|"[^"]*"|'[^']*')/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Scala keywords
+        const highlightKeywords = (str) => {
+            const keywords = getKeywordsForLanguage("scala");
+            const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Highlight functions
+        const highlightFunctions = (str) => {
+            return str.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, match =>
+                tokenize('functions', `<span style="color: #e6bd69;">${match}</span>`)
+            );
+        };
+        str = highlightFunctions(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightLua(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(--.*?$|--[\s\S]*?--)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/(["][^"]*["]|['][^']*['])/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Lua keywords
+        const highlightKeywords = (str) => {
+            const keywords = getKeywordsForLanguage("lua");
+            const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Highlight functions
+        const highlightFunctions = (str) => {
+            return str.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, match =>
+                tokenize('functions', `<span style="color: #e6bd69;">${match}</span>`)
+            );
+        };
+        str = highlightFunctions(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightPerl(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(#.*?$)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/(["][^"]*["]|['][^']*['])/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Perl keywords
+        const highlightKeywords = (str) => {
+            const keywords = getKeywordsForLanguage("perl");
+            const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Highlight functions
+        const highlightFunctions = (str) => {
+            return str.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, match =>
+                tokenize('functions', `<span style="color: #e6bd69;">${match}</span>`)
+            );
+        };
+        str = highlightFunctions(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightTypeScript(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\/.*?$|\/\*[\s\S]*?\*\/)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/(["][^"]*["]|['][^']*['])/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight TypeScript keywords
+        const highlightKeywords = (str) => {
+            const keywords = getKeywordsForLanguage("typescript");
+            const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Highlight functions
+        const highlightFunctions = (str) => {
+            return str.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, match =>
+                tokenize('functions', `<span style="color: #e6bd69;">${match}</span>`)
+            );
+        };
+        str = highlightFunctions(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightObjectiveC(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\/.*?$|\/\*[\s\S]*?\*\/)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/(["][^"]*["]|['][^']*['])/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Objective-C keywords
+        const highlightKeywords = (str) => {
+            const keywords = getKeywordsForLanguage("objective-c");
+            const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Highlight functions
+        const highlightFunctions = (str) => {
+            return str.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, match =>
+                tokenize('functions', `<span style="color: #e6bd69;">${match}</span>`)
+            );
+        };
+        str = highlightFunctions(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightBash(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(#.*?$)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/(["][^"]*["]|['][^']*['])/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Bash keywords
+        const highlightKeywords = (str) => {
+            const keywords = getKeywordsForLanguage("bash");
+            const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightHaskell(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(--.*?$)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/(["][^"]*["]|['][^']*['])/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Haskell keywords
+        const highlightKeywords = (str) => {
+            const keywords = getKeywordsForLanguage("haskell");
+            const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightDart(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\/.*?$|\/\*[\s\S]*?\*\/)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/(["][^"]*["]|['][^']*['])/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Dart keywords
+        const highlightKeywords = (str) => {
+            const keywords = getKeywordsForLanguage("dart");
+            const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightElixir(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(#.*?$)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/(["][^"]*["]|['][^']*['])/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Elixir keywords
+        const highlightKeywords = (str) => {
+            const keywords = getKeywordsForLanguage("elixir");
+            const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightFSharp(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\/.*?$|\/\*[\s\S]*?\*\/)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/(["][^"]*["]|['][^']*['])/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight F# keywords
+        const highlightKeywords = (str) => {
+            const keywords = getKeywordsForLanguage("f#");
+            const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightVHDL(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(--.*?$)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/(["][^"]*["]|['][^']*['])/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight VHDL keywords
+        const highlightKeywords = (str) => {
+            const keywords = getKeywordsForLanguage("vhdl");
+            const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightSQL(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\*[\s\S]*?\*\/|--.*?$)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/(["][^"]*["]|['][^']*['])/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight SQL keywords
+        const highlightKeywords = (str) => {
+            const keywords = getKeywordsForLanguage("sql");
+            const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightR(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/#.*$/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/(["][^"]*["]|['][^']*['])/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight R keywords
+        const highlightKeywords = (str) => {
+            const keywords = getKeywordsForLanguage("r");
+            const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightVala(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/(["][^"]*["]|['][^']*['])/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Vala keywords
+        const highlightKeywords = (str) => {
+            const valaKeywords = this.getKeywordsForLanguage('vala');
+            const regex = new RegExp(`\\b(${valaKeywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightJulia(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/(["][^"]*["]|['][^']*['])/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Julia keywords
+        const highlightKeywords = (str) => {
+            const juliaKeywords = this.getKeywordsForLanguage('julia');
+            const regex = new RegExp(`\\b(${juliaKeywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightNim(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(\/\/[^\n]*|\/\*[\s\S]*?\*\/)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/(["][^"]*["]|['][^']*['])/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight Nim keywords
+        const highlightKeywords = (str) => {
+            const nimKeywords = this.getKeywordsForLanguage('nim');
+            const regex = new RegExp(`\\b(${nimKeywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
+    highlightPowerShell(code) {
+        const tokens = {
+            comments: [],
+            strings: [],
+            keywords: [],
+            functions: []
+        };
+
+        const tokenize = (type, match) => {
+            const token = `__${type}_${tokens[type].length}__`;
+            tokens[type].push({ token, match });
+            return token;
+        };
+
+        let str = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // Highlight comments
+        const highlightComments = (str) => {
+            return str.replace(/(#.*?$|\/\*[\s\S]*?\*\/)/gm, match =>
+                tokenize('comments', `<span style="color: #5c6690;">${match}</span>`)
+            );
+        };
+        str = highlightComments(str);
+
+        // Highlight strings
+        const highlightStrings = (str) => {
+            return str.replace(/(["][^"]*["]|['][^']*['])/g, match =>
+                tokenize('strings', `<span style="color: #4CAF50;">${match}</span>`)
+            );
+        };
+        str = highlightStrings(str);
+
+        // Highlight PowerShell keywords
+        const highlightKeywords = (str) => {
+            const powershellKeywords = this.getKeywordsForLanguage('powershell');
+            const regex = new RegExp(`\\b(${powershellKeywords.join('|')})\\b`, 'g');
+            return str.replace(regex, match =>
+                tokenize('keywords', `<span style="color: #f5758d;">${match}</span>`)
+            );
+        };
+        str = highlightKeywords(str);
+
+        // Restore all tokens
+        Object.entries(tokens).forEach(([type, replacements]) => {
+            replacements.forEach(({ token, match }) => {
+                str = str.replace(token, match);
+            });
+        });
+
+        return str;
+    }
+
     getKeywordsForLanguage(language) {
         const keywords = {
             javascript: [
@@ -381,6 +1980,115 @@ class SnippyCopy {
                 'html', 'head', 'body', 'title', 'div', 'span', 'a', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
                 'ul', 'li', 'img', 'script', 'link', 'meta', 'style', 'form', 'input', 'button', 'table', 'tr',
                 'th', 'td', 'thead', 'tbody', 'footer', 'header', 'section', 'article', 'aside', 'nav'
+            ],
+            php: [
+                'if', 'else', 'elseif', 'for', 'foreach', 'while', 'do', 'switch', 'case', 'default',
+                'break', 'continue', 'return', 'function', 'class', 'public', 'private', 'protected',
+                'static', 'new', 'try', 'catch', 'throw', 'namespace', 'use', 'global', 'var', 'const', 'isset',
+                'empty', 'require', 'require_once', 'include', 'include_once', 'echo', 'print', 'exit', 'die'
+            ],
+            c: [
+                'auto', 'break', 'case', 'char', 'const', 'continue', 'default', 'do', 'double', 'else', 'enum',
+                'extern', 'float', 'for', 'goto', 'if', 'inline', 'int', 'long', 'register', 'return', 'short',
+                'signed', 'sizeof', 'static', 'struct', 'switch', 'typedef', 'union', 'unsigned', 'void', 'volatile',
+                'while'
+            ],
+            cpp: [
+                'alignas', 'alignof', 'and', 'and_eq', 'asm', 'auto', 'bitand', 'bitor', 'bool', 'break', 'case',
+                'catch', 'char', 'class', 'compl', 'const', 'constexpr', 'const_cast', 'continue', 'decltype', 'default',
+                'delete', 'do', 'double', 'dynamic_cast', 'else', 'enum', 'explicit', 'export', 'extern', 'false', 'final',
+                'float', 'for', 'friend', 'goto', 'if', 'inline', 'int', 'long', 'mutable', 'namespace', 'new', 'noexcept',
+                'not', 'not_eq', 'nullptr', 'operator', 'or', 'or_eq', 'private', 'protected', 'public', 'register', 'reinterpret_cast',
+                'return', 'short', 'signed', 'sizeof', 'static', 'static_assert', 'static_cast', 'struct', 'switch', 'template',
+                'this', 'throw', 'true', 'try', 'typedef', 'typeid', 'typename', 'union', 'unsigned', 'using', 'virtual', 'void',
+                'volatile', 'wchar_t', 'while'
+            ],
+            ruby: [
+                'def', 'end', 'if', 'else', 'elsif', 'unless', 'for', 'while', 'until', 'break', 'next', 'redo',
+                'retry', 'return', 'class', 'module', 'begin', 'rescue', 'ensure', 'super', 'self', 'yield',
+                'true', 'false', 'nil', 'and', 'or', 'not', 'require', 'include', 'private', 'protected', 'public'
+            ],
+            swift: [
+                'func', 'let', 'var', 'return', 'if', 'else', 'switch', 'case', 'break', 'continue', 'for', 'while',
+                'do', 'try', 'catch', 'class', 'struct', 'enum', 'protocol', 'extension', 'import', 'in', 'defer',
+                'guard', 'fallthrough', 'repeat', 'init', 'deinit', 'self', 'super', 'nil', 'true', 'false'
+            ],
+            go: [
+                'package', 'import', 'func', 'var', 'const', 'type', 'interface', 'struct', 'return', 'if', 'else',
+                'for', 'switch', 'case', 'defer', 'go', 'select', 'break', 'continue', 'fallthrough', 'chan', 'range',
+                'map', 'goto', 'len', 'cap', 'copy', 'append', 'interface', 'default', 'nil'
+            ],
+            rust: [
+                'let', 'mut', 'fn', 'return', 'if', 'else', 'match', 'loop', 'for', 'while', 'break', 'continue',
+                'pub', 'struct', 'enum', 'impl', 'trait', 'use', 'mod', 'self', 'super', 'const', 'static', 'ref',
+                'move', 'box', 'drop', 'unsafe', 'match', 'Some', 'None', 'Result', 'Ok', 'Err', 'async', 'await'
+            ],
+            kotlin: [
+                'fun', 'val', 'var', 'return', 'if', 'else', 'when', 'for', 'while', 'break', 'continue', 'try',
+                'catch', 'finally', 'class', 'object', 'interface', 'package', 'import', 'in', 'out', 'null', 'true',
+                'false', 'this', 'super', 'companion', 'constructor', 'init', 'is', 'as', 'by', 'dynamic'
+            ],
+            scala: [
+                'val', 'var', 'def', 'class', 'object', 'trait', 'if', 'else', 'for', 'while', 'match', 'case',
+                'return', 'throw', 'try', 'catch', 'finally', 'new', 'extends', 'implicit', 'private', 'protected',
+                'sealed', 'import', 'package', 'this', 'super', 'true', 'false', 'null', 'def', 'final'
+            ],
+            lua: [
+                'and', 'break', 'do', 'else', 'elseif', 'end', 'false', 'for', 'function', 'goto', 'if', 'in',
+                'local', 'nil', 'not', 'or', 'repeat', 'return', 'then', 'true', 'until', 'while'
+            ],
+            perl: [
+                'if', 'else', 'elsif', 'unless', 'foreach', 'for', 'while', 'do', 'continue', 'last', 'next',
+                'sub', 'my', 'our', 'use', 'require', 'package', 'return', 'local', 'die', 'exit', 'eval'
+            ],
+            typescript: [
+                'let', 'const', 'var', 'function', 'return', 'if', 'else', 'for', 'while', 'break', 'continue',
+                'try', 'catch', 'class', 'new', 'this', 'import', 'export', 'async', 'await', 'any', 'unknown',
+                'never', 'interface', 'type', 'extends', 'implements', 'public', 'private', 'protected'
+            ],
+            elixir: [
+                'def', 'end', 'if', 'else', 'case', 'do', 'defmodule', 'defp', 'defmacro', 'import', 'use', 'super',
+                'raise', 'try', 'catch', 'throw', 'async', 'await', 'nil', 'true', 'false', 'loop', 'fn', 'let',
+                'in', 'when', 'after'
+            ],
+            fsharp: [
+                'let', 'mutable', 'if', 'else', 'match', 'for', 'while', 'do', 'type', 'module', 'open', 'namespace',
+                'return', 'in', 'async', 'await', 'new', 'try', 'catch', 'finally', 'use', 'abstract', 'interface',
+                'abstract', 'type', 'static', 'class', 'public', 'private', 'protected'
+            ],
+            vhdl: [
+                'architecture', 'begin', 'end', 'process', 'if', 'else', 'elsif', 'case', 'when', 'then', 'not', 'and',
+                'or', 'in', 'out', 'buffer', 'signal', 'variable', 'type', 'constant', 'subtype', 'function', 'procedure',
+                'entity', 'port', 'configuration'
+            ],
+            sql: [
+                'SELECT', 'FROM', 'WHERE', 'JOIN', 'INNER', 'LEFT', 'RIGHT', 'OUTER', 'AND', 'OR', 'INSERT', 'UPDATE',
+                'DELETE', 'CREATE', 'DROP', 'ALTER', 'INDEX', 'GROUP BY', 'HAVING', 'ORDER BY', 'DISTINCT', 'BETWEEN',
+                'IN', 'LIKE', 'NULL', 'IS', 'EXISTS', 'AND', 'OR', 'NOT'
+            ],
+            r: [
+                'if', 'else', 'for', 'while', 'repeat', 'break', 'next', 'return', 'function', 'TRUE', 'FALSE', 'NULL',
+                'NA', 'Inf', 'NaN', 'tryCatch', 'try', 'stop', 'cat', 'library', 'require', 'install.packages', 'source',
+                'setwd', 'getwd', 'print', 'plot', 'data.frame', 'matrix', 'list', 'vector', 'factor', 'tapply', 'apply',
+                'lapply', 'sapply', 'mean', 'sum', 'sd', 'min', 'max', 'range', 'median', 'table', 'cor', 'cov', 'lm', 'glm',
+                'anova', 'summary', 'factor', 'subset', 'merge', 'join'
+            ],
+            vala: [
+                'namespace', 'class', 'private', 'public', 'protected', 'static', 'final', 'abstract', 'override',
+                'virtual', 'new', 'delete', 'return', 'if', 'else', 'for', 'while', 'switch', 'case', 'try', 'catch',
+                'throw', 'assert', 'this', 'super', 'void', 'true', 'false', 'null', 'var', 'let', 'const', 'foreach'
+            ],
+            julia: [
+                'function', 'return', 'if', 'else', 'elseif', 'for', 'while', 'break', 'continue', 'try', 'catch',
+                'let', 'global', 'const', 'mutable', 'module', 'using', 'import', 'export', 'type', 'abstract', 'immutable'
+            ],
+            nim: [
+                'proc', 'var', 'let', 'const', 'type', 'if', 'else', 'elif', 'for', 'while', 'continue', 'break', 'return',
+                'import', 'include', 'echo', 'assert', 'try', 'except', 'raise', 'dynamic', 'new', 'defer', 'global', 'static'
+            ],
+            powershell: [
+                'function', 'return', 'if', 'else', 'elseif', 'for', 'foreach', 'while', 'switch', 'case', 'try', 'catch',
+                'finally', 'throw', 'break', 'continue', 'import', 'export', 'let', 'in', 'global', 'true', 'false', 'null'
             ]
         };
 
