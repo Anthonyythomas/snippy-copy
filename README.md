@@ -52,21 +52,24 @@ Add the corresponding HTML element:
 
 ### `options` Object
 
-| Option            | Type    | Default Value | Description                                                   |
-|------------------|---------|------|---------------------------------------------------------------|
+| Option            | Type   | Default Value | Description                                                   |
+|------------------|--------|------|---------------------------------------------------------------|
 | `noCopy`         | Boolean | `false` | Disables the copy button.                                     |
 | `highlight`      | Boolean | `true` | Enables syntax highlighting.                                  |
-| `theme`          | String  | `'light'` | Sets the theme for the code snippet (`'light'` or `'dark'`).  |
-| `copyButtonText` | String  | `'📋'` | Text displayed on the copy button.                            |
-| `copyButtonStyle`| Object  | `{}` | Custom styles for the copy button.                            |
-| `errorMessage`   | String  | `'Unable to copy'` | Custom error message when copying fails.                      |
-| `caption`        | String  | `''` | Text displayed as a caption above the code snippet.           |
+| `theme`          | String | `'light'` | Sets the theme for the code snippet (`'light'` or `'dark'`).  |
+| `copyButtonText` | String | `'📋'` | Text displayed on the copy button.                            |
+| `copyButtonStyle`| Object | `{}` | Custom styles for the copy button.                            |
+| `errorMessage`   | String | `'Unable to copy'` | Custom error message when copying fails.                      |
+| `caption`        | String | `''` | Text displayed as a caption above the code snippet.           |
 | `showLineNumbers`| Boolean | `false` | Displays line numbers in the code snippet when set to `true`. |
-| `highlightLineNumbers`| Array   | `[]` | List of line numbers to highlight (e.g., `[2, 4, 6]`). This option works when `showLineNumbers` is enabled        |
-| `highlightLineColor`| String   | `''` | Color used to highlight the specified line numbers in `highlightLineNumbers`.       |
-| `copySuccessMessage`| String  | `'Code copied successfully! 🎉'` | Message shown after a successful copy.                        |
-| `fontSize`| String  | `'14px'` | Font size of the code.                                        |
-| `lineHeight`| String  | `'1.6'` | Line height of the code.                                      |
+| `highlightLineNumbers`| Array  | `[]` | List of line numbers to highlight (e.g., `[2, 4, 6]`). This option works when `showLineNumbers` is enabled        |
+| `highlightLineColor`| String | `''` | Color used to highlight the specified line numbers in `highlightLineNumbers`.       |
+| `copySuccessMessage`| String | `'Code copied successfully! 🎉'` | Message shown after a successful copy.                        |
+| `fontSize`| String | `'14px'` | Font size of the code.                                        |
+| `lineHeight`| String | `'1.6'` | Line height of the code.                                      |
+| `downloadable`| Boolean | `false` | Line height of the code.                                      |
+| `themeSwitcher`| Boolean | `false` | Line height of the code.                                      |
+| `disableCopyAnimation`| Boolean | `false` | Line height of the code.                                      |
 
 ## ✨ Example Usage
 

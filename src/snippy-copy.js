@@ -19,6 +19,9 @@ class SnippyCopy {
             copySuccessMessage: 'Code copied successfully! 🎉',
             fontSize: '14px',
             lineHeight: '1.5',
+            downloadable: false,
+            themeSwitcher: false,
+            disableCopyAnimation: false,
             ...options
         };
         this.keywords = this.getKeywordsForLanguage(language);
@@ -78,10 +81,21 @@ class SnippyCopy {
         codeElement.style.fontSize = this.options.fontSize;
         codeElement.style.lineHeight = this.options.lineHeight;
 
+        if (this.options.readOnly) codeElement.setAttribute("contenteditable", "false");
+
         if (!this.options.noCopy) {
             const copyButton = this.createCopyButton();
             copyButton.addEventListener("click", () => this.copyToClipboard(copyButton));
             pre.appendChild(copyButton);
+        }
+
+        if (this.options.downloadable) {
+            const downloadButton = this.createDownloadButton();
+            pre.appendChild(downloadButton);
+        }
+
+        if (this.options.themeSwitcher) {
+            this.addThemeSwitcher(pre);
         }
 
         pre.appendChild(codeElement);
@@ -2114,24 +2128,24 @@ class SnippyCopy {
     copyToClipboard(button) {
         navigator.clipboard.writeText(this.code)
             .then(() => {
-                // Change button text to show success
-                button.textContent = "✔️";
-                setTimeout(() => {
-                    button.textContent = "📋";
-                }, 1500);
 
-                // Display custom success message (you can show this in a toast or alert)
+                if (!this.options.disableCopyAnimation) {
+                    button.textContent = "✔️";
+                    setTimeout(() => {
+                        button.textContent = "📋";
+                    }, 1500);
+                }
+
                 this.showCopyMessage(this.options.copySuccessMessage);
             })
             .catch(() => {
-                // Show failure on button
-                console.log('Failed to copy');
-                button.textContent = "❌";
-                setTimeout(() => {
-                    button.textContent = "📋";
-                }, 1500);
+                if (!this.options.disableCopyAnimation) {
+                    button.textContent = "❌";
+                    setTimeout(() => {
+                        button.textContent = "📋";
+                    }, 1500);
+                }
 
-                // Display the error message
                 this.showCopyMessage(this.options.errorMessage);
             });
     }
@@ -2157,6 +2171,35 @@ class SnippyCopy {
         }, 3000);
     }
 
+    createDownloadButton() {
+        const button = document.createElement("button");
+        button.textContent = "⬇";
+        button.classList.add("download-btn");
+        button.addEventListener("click", () => this.downloadCode());
+        return button;
+    }
+
+    downloadCode() {
+        const blob = new Blob([this.code], { type: "text/plain" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `code.${this.language}`;
+        a.click();
+    }
+
+    addThemeSwitcher(container) {
+        const switcher = document.createElement("button");
+        switcher.textContent = "🌞/🌙";
+        switcher.classList.add("theme-switcher");
+
+        switcher.addEventListener("click", () => {
+            this.options.theme = this.options.theme === "dark" ? "light" : "dark";
+            container.classList.toggle("dark");
+            container.classList.toggle("light");
+        });
+
+        container.appendChild(switcher);
+    }
 }
 
 export default SnippyCopy;
